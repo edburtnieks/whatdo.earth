@@ -1,5 +1,5 @@
-import { Generated, Kysely } from "kysely";
-import { PlanetScaleDialect } from "../node_modules/kysely-planetscale/dist/index.mjs";
+import { Generated, Kysely } from 'kysely';
+import { PlanetScaleDialect } from 'kysely-planetscale';
 
 interface CountryTable {
     id: Generated<number>;
