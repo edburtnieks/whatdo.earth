@@ -25,8 +25,16 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add src/pages/${{ inputs.fileName }}.mdx
           git commit -m "Create country file - ${{ inputs.fileName }}.mdx" -a
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@master
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
