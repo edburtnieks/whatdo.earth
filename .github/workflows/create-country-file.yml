@@ -17,4 +17,4 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Create country file
-        run: echo "# ${{ inputs.countryName }}" >> ${{ inputs.fileName }}
+        run: echo "# ${{ inputs.countryName }}" >> "./src/pages/${{ inputs.fileName }}.mdx"
