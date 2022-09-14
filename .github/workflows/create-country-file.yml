@@ -17,16 +17,14 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Create country file
-        run: |
-          cd src/pages
-          echo "# ${{ inputs.countryName }}" >> "${{ inputs.fileName }}.mdx"
-          cd ../../
+        run: echo "# ${{ inputs.countryName }}" >> "src/pages/${{ inputs.fileName }}.mdx"
 
       - name: Commit files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "Create country file" -a
+          git add src/pages/${{ inputs.fileName }}.mdx
+          git commit -m "Create country file - ${{ inputs.fileName }}.mdx" -a
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
