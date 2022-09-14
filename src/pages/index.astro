@@ -30,8 +30,9 @@ if (Astro.request.method === 'POST') {
         // Create entry
         await db.insertInto('country').values(parsedCountry.data).execute();
 
-        const response = await fetch(
-            'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/main.yml/dispatches',
+        // Create country page in GitHub
+        await fetch(
+            'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/create-country-file.yml/dispatches',
             {
                 method: 'POST',
                 headers: {
@@ -40,15 +41,13 @@ if (Astro.request.method === 'POST') {
                 },
                 body: JSON.stringify({
                     ref: 'main',
+                    inputs: {
+                        fileName: parsedCountry.data.key,
+                        countryName: parsedCountry.data.name,
+                    },
                 }),
             }
         );
-
-        console.log({ response });
-
-        const data = await response.json();
-
-        console.log({ data });
     }
 }
 

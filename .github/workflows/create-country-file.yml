@@ -1,0 +1,20 @@
+name: Create country file
+on:
+  workflow_dispatch:
+    inputs:
+      fileName:
+        description: 'Country file name'
+        required: true
+        type: string
+      countryName:
+        description: 'Country name'
+        required: true
+        type: string
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create country file
+        run: echo "# ${{ inputs.countryName }}" >> ${{ inputs.fileName }}
