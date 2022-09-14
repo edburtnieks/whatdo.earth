@@ -28,11 +28,7 @@ if (Astro.request.method === 'POST') {
         }
 
         // Create entry
-        const row = await db.insertInto('country').values(parsedCountry.data).returning('id').executeTakeFirst();
-
-        if (!row?.id) {
-            return;
-        }
+        await db.insertInto('country').values(parsedCountry.data).execute();
 
         const response = await fetch(
             'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/main.yaml/dispatches',
