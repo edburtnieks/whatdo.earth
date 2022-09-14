@@ -28,7 +28,31 @@ if (Astro.request.method === 'POST') {
         }
 
         // Create entry
-        await db.insertInto('country').values(parsedCountry.data).execute();
+        const row = await db.insertInto('country').values(parsedCountry.data).returning('id').executeTakeFirst();
+
+        if (!row?.id) {
+            return;
+        }
+
+        const response = await fetch(
+            'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/main.yaml/dispatches',
+            {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/vnd.github+json',
+                    Authorization: `Bearer ${import.meta.env.GITHUB_TOKEN}`,
+                },
+                body: JSON.stringify({
+                    ref: 'main',
+                }),
+            }
+        );
+
+        console.log({ response });
+
+        const data = await response.json();
+
+        console.log({ data });
     }
 }
 
