@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel/serverless';
+import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
@@ -7,7 +8,8 @@ export default defineConfig({
   adapter: vercel(),
   vite: {
     ssr: {
-      noExternal: ['kysely-planetscale'],
-    },
+      noExternal: ['kysely-planetscale']
+    }
   },
+  integrations: [mdx()]
 });
