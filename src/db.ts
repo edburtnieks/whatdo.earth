@@ -4,6 +4,8 @@ import { PlanetScaleDialect } from 'kysely-planetscale';
 interface CountryTable {
     id: Generated<number>;
     name: string;
+    key: string;
+    draft: Generated<boolean>;
 }
 
 interface Database {
