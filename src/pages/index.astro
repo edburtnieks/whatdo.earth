@@ -31,7 +31,7 @@ if (Astro.request.method === 'POST') {
         await db.insertInto('country').values(parsedCountry.data).execute();
 
         const response = await fetch(
-            'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/main.yaml/dispatches',
+            'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/main.yml/dispatches',
             {
                 method: 'POST',
                 headers: {
