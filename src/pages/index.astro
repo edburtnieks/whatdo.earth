@@ -56,14 +56,24 @@ const showDrafts = !!(Astro.url.searchParams.get('show-drafts') === 'true');
         <h2 id="countries-title">Countries</h2>
         <ul aria-labelledby="countries-title">
             {
-                countryList.map((country) => (
-                    <li>
-                        <a href={country.key}>
-                            <span>{country.name}</span>
-                            {showDrafts && country.draft ? <span>(Draft)</span> : null}
-                        </a>
-                    </li>
-                ))
+                countryList.map((country) => {
+                    if (!country.draft) {
+                        return (
+                            <li>
+                                <a href={country.key}>{country.name}</a>
+                            </li>
+                        );
+                    } else if (showDrafts) {
+                        return (
+                            <li>
+                                <a href={country.key}>
+                                    <span>{country.name}</span>
+                                    {<span>(Draft)</span>}
+                                </a>
+                            </li>
+                        );
+                    }
+                })
             }
         </ul>
     </body>
