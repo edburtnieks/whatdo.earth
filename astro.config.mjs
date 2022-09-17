@@ -4,12 +4,15 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  output: 'server',
-  adapter: vercel(),
-  vite: {
-    ssr: {
-      noExternal: ['kysely-planetscale']
-    }
-  },
-  integrations: [mdx()]
+    output: 'server',
+    adapter: vercel(),
+    vite: {
+        ssr: {
+            noExternal: ['kysely-planetscale'],
+        },
+    },
+    integrations: [mdx()],
+    markdown: {
+        drafts: true,
+    },
 });
