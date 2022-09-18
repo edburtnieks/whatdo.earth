@@ -1,4 +1,5 @@
-import { Generated, Kysely } from 'kysely';
+import { Kysely } from 'kysely';
+import type { Generated } from 'kysely';
 import { PlanetScaleDialect } from 'kysely-planetscale';
 
 interface CountryTable {
@@ -8,8 +9,16 @@ interface CountryTable {
     draft: Generated<boolean>;
 }
 
+interface DraftTable {
+    id: Generated<number>;
+    type: string;
+    key: string;
+    content?: string;
+}
+
 interface Database {
     country: CountryTable;
+    draft: DraftTable;
 }
 
 export const db = new Kysely<Database>({

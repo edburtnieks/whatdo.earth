@@ -12,7 +12,4 @@ export default defineConfig({
         },
     },
     integrations: [mdx()],
-    markdown: {
-        drafts: true,
-    },
 });

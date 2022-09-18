@@ -4,6 +4,7 @@ import { db } from '@db';
 import BaseLayout from '@layouts/BaseLayout.astro';
 
 const countryList = await db.selectFrom('country').selectAll().execute();
+const drafts = await db.selectFrom('draft').selectAll().execute();
 
 const allPages = await Astro.glob('./*.mdx');
 const countryPages = allPages.filter((page) => page.frontmatter.type === 'country');
@@ -13,55 +14,41 @@ if (Astro.request.method === 'POST') {
     const intent = formData.get('intent');
 
     if (intent === 'add-country') {
-        const countryName = formData.get('country');
-        // const countryKey = formData.get('country-key');
+        const countryKey = formData.get('country');
 
         // Validate
         const countrySchema = z.object({
-            name: z.string(),
-            // key: z.string(),
+            type: z.string(),
+            key: z.string(),
         });
 
         const parsedCountry = countrySchema.safeParse({
-            name: countryName,
-            // key: countryKey,
+            type: 'country',
+            key: countryKey,
         });
 
         if (!parsedCountry.success) {
             return;
         }
 
-        console.log({ country: parsedCountry.data });
-
-        // // Create entry
-        // await db.insertInto('country').values(parsedCountry.data).execute();
-
-        // // Create country page in GitHub
-        // await fetch(
-        //     'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/create-country-file.yml/dispatches',
-        //     {
-        //         method: 'POST',
-        //         headers: {
-        //             Accept: 'application/vnd.github+json',
-        //             Authorization: `Bearer ${import.meta.env.GITHUB_TOKEN}`,
-        //         },
-        //         body: JSON.stringify({
-        //             ref: 'main',
-        //             inputs: {
-        //                 fileName: parsedCountry.data.key,
-        //                 countryName: parsedCountry.data.name,
-        //             },
-        //         }),
-        //     }
-        // );
+        // Create entry
+        await db.insertInto('draft').values(parsedCountry.data).execute();
     }
 }
-
-const showDrafts = !!(Astro.url.searchParams.get('show-drafts') === 'true');
 ---
 
 <BaseLayout>
     <h1>Home</h1>
+    <h2>Drafts</h2>
+    <ul>
+        {
+            drafts.map((draft) => (
+                <li>
+                    <a href={`/edit/${draft.key}`}>{draft.key}</a>
+                </li>
+            ))
+        }
+    </ul>
     <h2>Add country</h2>
     <form method="post">
         <label for="country">Country</label>
@@ -73,24 +60,11 @@ const showDrafts = !!(Astro.url.searchParams.get('show-drafts') === 'true');
     <h2 id="countries-title">Countries</h2>
     <ul aria-labelledby="countries-title">
         {
-            countryPages.map((page) => {
-                if (!page.frontmatter.draft) {
-                    return (
-                        <li>
-                            <a href={page.frontmatter.key}>{page.frontmatter.country}</a>
-                        </li>
-                    );
-                } else if (showDrafts) {
-                    return (
-                        <li>
-                            <a href={page.frontmatter.key}>
-                                {page.frontmatter.country}
-                                <span>(Draft)</span>
-                            </a>
-                        </li>
-                    );
-                }
-            })
+            countryPages.map((page) => (
+                <li>
+                    <a href={page.frontmatter.key}>{page.frontmatter.country}</a>
+                </li>
+            ))
         }
     </ul>
 </BaseLayout>

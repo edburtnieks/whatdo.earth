@@ -1,0 +1,67 @@
+---
+import { z } from 'zod';
+import { db } from '@db';
+
+const { key } = Astro.params;
+const draft = await db
+    .selectFrom('draft')
+    .selectAll()
+    .where(`key`, '=', key as string)
+    .executeTakeFirst();
+
+if (draft) {
+    if (Astro.request.method === 'POST') {
+        const formData = await Astro.request.formData();
+        const intent = formData.get('intent');
+        const content = formData.get('content');
+
+        const contentSchema = z.string();
+        const parsedContent = contentSchema.safeParse(content);
+
+        if (!parsedContent.success) {
+            return;
+        }
+
+        if (intent === 'update-content') {
+            await db.updateTable('draft').set({ content: parsedContent.data }).where('key', '=', draft.key).execute();
+        } else if (intent === 'submit-for-approval') {
+            const content = `---
+                            layout: '@layouts/CountryLayout.astro'
+                            type: ${draft.type}
+                            key: ${draft.key}
+                            draft: true
+                            ---
+                            ${parsedContent.data}`;
+
+            await fetch(
+                'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/create-country-file.yml/dispatches',
+                {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/vnd.github+json',
+                        Authorization: `Bearer ${import.meta.env.GITHUB_TOKEN}`,
+                    },
+                    body: JSON.stringify({
+                        ref: 'main',
+                        inputs: {
+                            fileName: draft.key,
+                            content,
+                        },
+                    }),
+                }
+            );
+        }
+    }
+}
+---
+
+<h1>Edit {key} page</h1>
+
+<form method="post">
+    <label for="content">Content</label>
+    <textarea name="content" id="content" cols="30" rows="10">{draft?.content}</textarea>
+    <button type="submit" name="intent" value="update-content">Save</button>
+    <button type="submit" name="intent" value="submit-for-approval">Submit for approval</button>
+</form>
+
+<Fragment set:html={draft?.content} />

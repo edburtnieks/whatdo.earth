@@ -7,5 +7,6 @@
     },
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "files.insertFinalNewline": true
 }
