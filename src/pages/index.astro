@@ -7,7 +7,7 @@ const countryList = await db.selectFrom('country').selectAll().execute();
 const drafts = await db.selectFrom('draft').selectAll().execute();
 
 const allPages = await Astro.glob('./*.mdx');
-const countryPages = allPages.filter((page) => page.frontmatter.type === 'country');
+const countryPages = allPages.filter((page) => page.frontmatter.type === 'country' && !page.frontmatter.draft);
 
 if (Astro.request.method === 'POST') {
     const formData = await Astro.request.formData();
@@ -62,7 +62,7 @@ if (Astro.request.method === 'POST') {
         {
             countryPages.map((page) => (
                 <li>
-                    <a href={page.frontmatter.key}>{page.frontmatter.country}</a>
+                    <a href={page.frontmatter.key}>{page.frontmatter.key}</a>
                 </li>
             ))
         }
