@@ -5,6 +5,11 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 
 const countryList = await db.selectFrom('country').selectAll().execute();
 const drafts = await db.selectFrom('draft').selectAll().execute();
+const waitingForApproval = await db
+    .selectFrom('draft')
+    .selectAll()
+    .where('status', '=', 'waiting-for-approval')
+    .execute();
 
 const allPages = await Astro.glob('./*.mdx');
 const countryPages = allPages.filter((page) => page.frontmatter.type === 'country' && !page.frontmatter.draft);
@@ -12,10 +17,9 @@ const countryPages = allPages.filter((page) => page.frontmatter.type === 'countr
 if (Astro.request.method === 'POST') {
     const formData = await Astro.request.formData();
     const intent = formData.get('intent');
+    const countryKey = formData.get('country');
 
     if (intent === 'add-country') {
-        const countryKey = formData.get('country');
-
         // Validate
         const countrySchema = z.object({
             type: z.string(),
@@ -33,12 +37,69 @@ if (Astro.request.method === 'POST') {
 
         // Create entry
         await db.insertInto('draft').values(parsedCountry.data).execute();
+    } else if (intent === 'approve-country') {
+        if (!countryKey) {
+            return new Response(null, { status: 500 });
+        }
+
+        await db
+            .updateTable('draft')
+            .set({ status: 'approved' })
+            .where('key', '=', countryKey as string)
+            .execute();
+
+        const approvedPage = await db
+            .selectFrom('draft')
+            .selectAll()
+            .where('key', '=', countryKey as string)
+            .where('status', '=', 'approved')
+            .executeTakeFirst();
+
+        if (!approvedPage) {
+            return new Response(null, { status: 500 });
+        }
+
+        const content = `---\nlayout: '@layouts/CountryLayout.astro'\ntype: ${approvedPage.type}\nkey: ${approvedPage.key}\n---\n\n${approvedPage.content}`;
+
+        await fetch(
+            'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/create-country-file.yml/dispatches',
+            {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/vnd.github+json',
+                    Authorization: `Bearer ${import.meta.env.GITHUB_TOKEN}`,
+                },
+                body: JSON.stringify({
+                    ref: 'main',
+                    inputs: {
+                        fileName: approvedPage.key,
+                        content,
+                    },
+                }),
+            }
+        );
     }
 }
 ---
 
 <BaseLayout>
     <h1>Home</h1>
+    <h2>Waiting for approval</h2>
+    <ul>
+        {
+            waitingForApproval.map((draft) => (
+                <li>
+                    <p>{draft.key}</p>
+                    <form method="post">
+                        <input type="hidden" name="country" value={draft.key} />
+                        <button type="submit" name="intent" value="approve-country">
+                            Approve {draft.key}
+                        </button>
+                    </form>
+                </li>
+            ))
+        }
+    </ul>
     <h2>Drafts</h2>
     <ul>
         {

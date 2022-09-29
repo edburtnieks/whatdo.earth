@@ -14,6 +14,7 @@ interface DraftTable {
     type: string;
     key: string;
     content?: string;
+    draft: 'draft' | 'waiting-for-approval' | 'approved';
 }
 
 interface Database {
