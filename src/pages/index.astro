@@ -4,7 +4,7 @@ import { db } from '@db';
 import BaseLayout from '@layouts/BaseLayout.astro';
 
 const countryList = await db.selectFrom('country').selectAll().execute();
-const drafts = await db.selectFrom('draft').selectAll().execute();
+const drafts = await db.selectFrom('draft').selectAll().where('status', '=', 'draft').execute();
 const waitingForApproval = await db
     .selectFrom('draft')
     .selectAll()
