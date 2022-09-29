@@ -27,7 +27,7 @@ if (draft) {
         } else if (intent === 'submit-for-approval') {
             await db
                 .updateTable('draft')
-                .set({ status: 'waiting-for-approval' })
+                .set({ content: parsedContent.data, status: 'waiting-for-approval' })
                 .where('key', '=', draft.key)
                 .execute();
         }
