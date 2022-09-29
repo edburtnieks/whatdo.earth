@@ -26,11 +26,6 @@ if (draft) {
             await db.updateTable('draft').set({ content: parsedContent.data }).where('key', '=', draft.key).execute();
         } else if (intent === 'submit-for-approval') {
             await db
-                .insertInto('draft')
-                .values({ key: draft.key, type: 'country', content: parsedContent.data })
-                .execute();
-
-            await db
                 .updateTable('draft')
                 .set({ status: 'waiting-for-approval' })
                 .where('key', '=', draft.key)
