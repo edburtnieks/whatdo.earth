@@ -32,7 +32,7 @@ if (Astro.request.method === 'POST') {
         });
 
         if (!parsedCountry.success) {
-            return;
+            return new Response(null, { status: 500 });
         }
 
         // Create entry

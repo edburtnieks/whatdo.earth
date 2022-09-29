@@ -19,39 +19,22 @@ if (draft) {
         const parsedContent = contentSchema.safeParse(content);
 
         if (!parsedContent.success) {
-            return;
+            return new Response(null, { status: 500 });
         }
 
         if (intent === 'update-content') {
             await db.updateTable('draft').set({ content: parsedContent.data }).where('key', '=', draft.key).execute();
         } else if (intent === 'submit-for-approval') {
             await db
+                .insertInto('draft')
+                .values({ key: draft.key, type: 'country', content: parsedContent.data })
+                .execute();
+
+            await db
                 .updateTable('draft')
                 .set({ status: 'waiting-for-approval' })
                 .where('key', '=', draft.key)
                 .execute();
-
-            // const content = `---\nlayout: '@layouts/CountryLayout.astro'\ntype: ${draft.type}\nkey: ${draft.key}\ndraft: true\n---\n\n${parsedContent.data}`;
-
-            // console.log(content);
-
-            // await fetch(
-            //     'https://api.github.com/repos/edburtnieks/whatdo.earth/actions/workflows/create-country-file.yml/dispatches',
-            //     {
-            //         method: 'POST',
-            //         headers: {
-            //             Accept: 'application/vnd.github+json',
-            //             Authorization: `Bearer ${import.meta.env.GITHUB_TOKEN}`,
-            //         },
-            //         body: JSON.stringify({
-            //             ref: 'main',
-            //             inputs: {
-            //                 fileName: draft.key,
-            //                 content,
-            //             },
-            //         }),
-            //     }
-            // );
         }
     }
 }
